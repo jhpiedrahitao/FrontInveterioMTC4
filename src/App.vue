@@ -1,8 +1,92 @@
 <template>
+  <div id="app" class="app">
+    <div class="header">
+      <h1>Inventario de Ferreteria</h1>
+      <nav>
+        <button v-on:click="init" v-if="is_auth" > Inicio </button>
+        <button v-on:click="logOut" v-if="is_auth" > Cerrar Sesión </button>
+      </nav>
+    </div>
+    
+    <div class="main-component">
+      <router-view v-on:log-in="logIn"></router-view>
+    </div>
 
+    <div class="footer">
+      <h2>Grupo 2 ciclo 4a Misión TIC 2022</h2>
+    </div>
+  </div>
 </template>
 
 <script>
+import gql from 'graphql-tag'
+
+export default {
+  name: 'App',
+
+  data: function(){
+    return{
+      is_auth: false
+    }
+  },
+
+  created: function(){
+    this.updateAccessToken();
+  },
+
+  methods:{
+    updateAccessToken: async function(){
+      if(localStorage.getItem('refresh_token')==null){
+        this.$router.push({name: "user_auth"})
+        this.is_auth = false
+        return;
+      }
+      await this.$apollo.mutate({
+        mutation: gql`
+           mutation ($refreshTokenRefresh: String!) {
+            refreshToken(refresh: $refreshTokenRefresh) {
+              access
+            }
+          }`
+        ,
+        variables: {
+          refreshTokenRefresh: localStorage.getItem('refresh_token')
+        }
+        }).then((result) => {
+          localStorage.setItem('access_token', result.data.refreshToken.access)
+          this.is_auth = true
+        }).catch((error) => {
+          alert("Su sesión expiró, vuelva a iniciar sesión.")
+          this.$router.push({name: "user_auth"})
+          this.is_auth = false
+        });
+      },
+
+    logIn: async function(data, username){
+      localStorage.setItem('access_token', data.access)
+      localStorage.setItem('refresh_token', data.refresh)
+      localStorage.setItem('user_id', data.user_id)
+      localStorage.setItem('current_username', username)
+
+      await this.updateAccessToken();
+      if(this.is_auth) this.init();
+    },
+    init: function(){
+      this.$router.push({
+        name: "user",
+        params:{ username: localStorage.getItem("current_username") }
+      })
+    },
+
+    logOut: async function(){
+      localStorage.removeItem('access_token')
+      localStorage.removeItem('refresh_token')
+      localStorage.removeItem('user_id')
+      localStorage.removeItem('current_username')
+      await this.updateAccessToken();
+    }
+  }
+}
 
 </script>
 
@@ -16,11 +100,11 @@
     left: 0px;
     top: 0px;
     width: 100%;
-    height: 100px;
+    height: 75px;
     margin: 0%;
     padding: 0;
 
-    background-color: #283747 ;
+    background-color: #e69d29 ;
     color:#E5E7E9  ;
 
     display: flex;
@@ -29,13 +113,14 @@
   }
 
   .header h1{
-    width: 20%;
+    width: 35%;
     text-align: center;
+    font-weight: bold;
   }
 
   .header nav {
     height: 100%;
-    width: 40%;
+    width: 70%;
 
     display: flex;
     justify-content: space-around;
@@ -46,15 +131,16 @@
 
   .header nav button{
     color: #E5E7E9;
-    background: #283747;
+    background: #e69d29;
     border: 1px solid #E5E7E9;
 
-    border-radius: 5px;
-    padding: 10px 20px;
+    border-radius: 20px;
+    padding: 5px 20px;
+    font-weight: bold;
   }
 
   .header nav button:hover{
-    color: #283747;
+    color: #e69d29;
     background: #E5E7E9;
     border: 1px solid #E5E7E9;
   }
@@ -72,9 +158,9 @@
     left: 0px;
     bottom: 0px;
     width: 100%;
-    height: 75px;
+    height: 45px;
 
-    background-color: #283747;
+    background-color: #e69d29;
     color: #E5E7E9;
   }
 
