@@ -4,7 +4,13 @@
       <h1>Inventario de Ferreteria</h1>
       <nav>
         <button v-on:click="init" v-if="is_auth" > Inicio </button>
+        <button v-on:click="inventory" v-if="is_auth" > Inventario </button>
+        <button v-on:click="buy" v-if="is_auth" > Compra </button>
+        <button v-on:click="sell" v-if="is_auth" > Venta </button>
+        <button v-on:click="buyHistorial" v-if="is_auth" > Historial compras </button>
+        <button v-on:click="sellHistorial" v-if="is_auth" > Historial ventas </button>
         <button v-on:click="logOut" v-if="is_auth" > Cerrar Sesión </button>
+
       </nav>
     </div>
     
@@ -59,6 +65,7 @@ export default {
           alert("Su sesión expiró, vuelva a iniciar sesión.")
           this.$router.push({name: "user_auth"})
           this.is_auth = false
+          localStorage.clear();
         });
       },
 
@@ -71,11 +78,54 @@ export default {
       await this.updateAccessToken();
       if(this.is_auth) this.init();
     },
+
     init: function(){
       this.$router.push({
         name: "user",
         params:{ username: localStorage.getItem("current_username") }
       })
+    },
+    
+    account: function () {
+      this.$router.push({
+        name: "account",
+        params: { username: localStorage.getItem("current_username") },
+      });
+    },
+
+    inventory: function () {
+      this.$router.push({
+        name: "inventory",
+        params: { username: localStorage.getItem("current_username") },
+      });
+    },
+
+    buy: function () {
+      this.$router.push({
+        name: "buy",
+        params: { username: localStorage.getItem("current_username") },
+      });
+    },
+
+    sell: function () {
+      this.$router.push({
+        name: "sell",
+        params: { username: localStorage.getItem("current_username") },
+      });
+    },
+
+    sellHistorial: function () {
+      this.$router.push({
+        name: "sellHistorial",
+        params: { username: localStorage.getItem("current_username") },
+      });
+    },
+
+    buyHistorial: function () {
+      this.$router.push({
+        name: "buyHistorial",
+        params: { username: localStorage.getItem("current_username") },
+      });
     },
 
     logOut: async function(){
@@ -120,7 +170,7 @@ export default {
 
   .header nav {
     height: 100%;
-    width: 70%;
+    width: 60%;
 
     display: flex;
     justify-content: space-around;
